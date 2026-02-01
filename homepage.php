@@ -8,6 +8,8 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
+$userId = $_SESSION["user"]["id"];
+
 if (isset($_POST['logout'])) {
     session_destroy();
     header("Location: index.php");
@@ -27,7 +29,7 @@ if (isset($_POST["delete_slide"])) {
 if (isset($_POST["create_slide"])) {
     $slide_title = $_POST["slide_title"];
     $slide_url = $_POST["slide_url"];
-    $result = query("INSERT INTO slides(title, url) VALUES('$slide_title', '$slide_url');");
+    $result = query("INSERT INTO slides(title, url, userId) VALUES('$slide_title', '$slide_url', '$userId');");
     if (!$result) {
         echo "<script>alert('Failed to create new slide')</script>";
     } else {
@@ -35,8 +37,7 @@ if (isset($_POST["create_slide"])) {
     }
 }
 
-$response = file_get_contents(HOST . "slides.php");
-$slides = json_decode($response, true);
+$slides = query("SELECT * FROM slides WHERE userId = '$userId'");
 ?>
 
 <!DOCTYPE html>
@@ -50,6 +51,7 @@ $slides = json_decode($response, true);
 </head>
 
 <body>
+    <input type="hidden" id="userId" value="<?= $userId ?>">
     <main class="relative w-xl mx-auto px-4">
         <nav class="flex justify-center items-center">
             <div class="mt-5">
@@ -76,17 +78,19 @@ $slides = json_decode($response, true);
         </nav>
 
         <section id="sliders-container" class="grid grid-cols-3 gap-5 mt-8">
-            <?php foreach ($slides as $slide) : ?>
-                <a href="./detail.php?id=<?= $slide['id'] ?>" class="card relative">
-                    <form class="absolute -right-2 top-2 bg-rose-600 w-10 h-10 rounded-full" action="" method="post">
-                        <input type="hidden" name="slide_id" value="<?= $slide['id'] ?>">
-                        <button name="delete_slide" class="cursor-pointer w-full h-full font-bold text-white" type="submit">X</button>
-                    </form>
-                    <h1 class="text-lg font-semibold"><?= $slide['title'] ?></h1>
-                    <img class="w-full rounded-xl" src="https://placehold.co/400">
-                    <p class="tracking-tighter text-sm mt-1">Latest view: <?= formatDateShort($slide['latestView']) ?></p>
-                </a>
-            <?php endforeach; ?>
+            <?php if (count($slides) > 0): ?>
+                <?php foreach ($slides as $slide) : ?>
+                    <a href="./detail.php?id=<?= $slide['id'] ?>" class="card relative">
+                        <form class="absolute -right-2 top-2 bg-rose-600 w-10 h-10 rounded-full" action="" method="post">
+                            <input type="hidden" name="slide_id" value="<?= $slide['id'] ?>">
+                            <button name="delete_slide" class="cursor-pointer w-full h-full font-bold text-white" type="submit">X</button>
+                        </form>
+                        <h1 class="text-lg font-semibold"><?= $slide['title'] ?></h1>
+                        <img class="w-full rounded-xl" src="https://placehold.co/400">
+                        <p class="tracking-tighter text-sm mt-1">Latest view: <?= formatDateShort($slide['latestView']) ?></p>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </section>
 
         <section class="mt-5">
@@ -131,6 +135,7 @@ $slides = json_decode($response, true);
     </main>
 
     <script>
+        const userId = document.getElementById("userId").value;
         const btnOpenDialog = document.getElementById("btn-open-dialog")
         const btnCloseDialog = document.getElementById("btn-close-dialog")
         const dialogOverlay = document.getElementById("dialog-overlay")
@@ -163,7 +168,7 @@ $slides = json_decode($response, true);
         let slidersContainer = document.getElementById("sliders-container");
         input.addEventListener("keyup", async (ev) => {
             const value = ev.target.value.toLowerCase();
-            const response = await fetch(`http://localhost/freya-ia/api/slides.php?query=${value}`)
+            const response = await fetch(`http://localhost/freya-ia/api/slides.php?query=${value}&id=${userId}`)
             const slides = await response.json();
 
             slidersContainer.innerHTML = ""

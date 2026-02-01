@@ -1,0 +1,27 @@
+{
+  "name": "freya-ia",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andressetiawan/freya-ia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/andressetiawan/freya-ia/issues"
+  },
+  "homepage": "https://github.com/andressetiawan/freya-ia#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.11",
+    "puppeteer": "^24.36.0"
+  }
+}

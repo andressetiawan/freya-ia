@@ -1,0 +1,5 @@
+How to run the server:
+1. Open terminal
+2. Type: npm run start
+3. Make sure the server is running
+4. Can open http://localhost:3000/ to check the server is running
